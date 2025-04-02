@@ -1,0 +1,72 @@
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Select, SelectTrigger, SelectContent, SelectItem } from '@/components/ui/select';
+
+const questions = [
+  { id: 1, text: 'Do you need high temperature resistance?', options: ['Yes', 'No'] },
+  { id: 2, text: 'Is flexibility important?', options: ['Yes', 'No'] },
+  { id: 3, text: 'Does it need to be food safe?', options: ['Yes', 'No'] },
+  { id: 4, text: 'Do you need high tensile strength?', options: ['Yes', 'No'] },
+  { id: 5, text: 'What brand of 3D printer do you have?', options: ['Creality', 'Prusa', 'Anycubic', 'Ultimaker', 'Raise3D', 'LulzBot', 'Formlabs', 'FlashForge', 'Dremel', 'Artillery', 'Monoprice', 'MakerBot', 'Qidi Tech', 'Snapmaker', 'XYZprinting', 'BambuLab'] },
+  { id: 6, text: 'What color of filament would you like?', options: ['Red', 'Blue', 'Green', 'Black', 'White', 'Other'] }
+];
+
+const decisionTree = {
+  'YesYesYesYesCrealityRed': 'PEEK - Red',
+  'YesYesYesNoPrusaBlue': 'PEI - Blue',
+  'YesYesNoYesAnycubicGreen': 'Nylon - Green',
+  'YesYesNoNoUltimakerBlack': 'Polycarbonate - Black',
+  'YesNoYesYesRaise3DWhite': 'PETG - White',
+  'YesNoYesNoLulzBotOther': 'PLA - Custom Color',
+  'NoYesYesYesFormlabs': 'TPU',
+  'NoYesYesNoFlashForge': 'TPE',
+  'NoNoYesYesDremel': 'ABS',
+  'NoNoYesNoArtillery': 'PLA',
+};
+
+export default function FilamentSelector() {
+  const [answers, setAnswers] = useState([]);
+  const [result, setResult] = useState(null);
+
+  const handleAnswer = (answer) => {
+    setAnswers((prev) => [...prev, answer]);
+    if (answers.length === questions.length - 1) {
+      const key = [...answers, answer].join('');
+      setResult(decisionTree[key] || 'Recommendation not available');
+    }
+  };
+
+  return (
+    <div className='p-4'>
+      <h1 className='text-xl mb-4'>3D Printing Filament Selector</h1>
+      {result ? (
+        <Card>
+          <CardContent>
+            <h2 className='text-lg'>Recommended Filament: {result}</h2>
+          </CardContent>
+        </Card>
+      ) : (
+        <div>
+          <p className='mb-2'>{questions[answers.length].text}</p>
+          {answers.length === 4 ? (
+            <Select onValueChange={(value) => handleAnswer(value)}>
+              <SelectTrigger className='w-64'>Select Brand</SelectTrigger>
+              <SelectContent>
+                {questions[answers.length].options.map((option) => (
+                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            questions[answers.length].options.map((option) => (
+              <Button key={option} className='mr-2' onClick={() => handleAnswer(option)}>
+                {option}
+              </Button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
